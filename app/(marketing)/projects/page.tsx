@@ -1,22 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProjectCard } from "@/components/shared/ProjectCard";
-import { MOCK_PROJECTS, MOCK_CATEGORIES } from "@/lib/mock-data";
-import { Search, Filter, SlidersHorizontal, Briefcase } from "lucide-react";
+import { getCategories, getProjects } from "@/lib/supabase/db";
+import { Project, Category } from "@/types";
+import { Search, Briefcase } from "lucide-react";
 
 export default function ProjectsDirectoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  const filteredProjects = MOCK_PROJECTS.filter((p) => {
-    const matchesSearch =
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "all" || p.category?.slug === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      const [catData, projData] = await Promise.all([
+        getCategories(),
+        getProjects(selectedCategory, searchQuery),
+      ]);
+      setCategories(catData);
+      setProjects(projData);
+      setIsLoading(false);
+    }
+    loadData();
+  }, [selectedCategory, searchQuery]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -25,7 +35,7 @@ export default function ProjectsDirectoryPage() {
       <div className="mb-8">
         <h1 className="font-extrabold text-3xl text-text-primary">Eksplorasi Proyek & Pekerjaan</h1>
         <p className="text-xs text-text-muted mt-1">
-          Temukan mikro-proyek yang sesuai dengan keahlian Anda dan mulai hasilkan pendapatan.
+          Data proyek diambil secara dinamis dari database Supabase Taskara.
         </p>
       </div>
 
@@ -56,7 +66,7 @@ export default function ProjectsDirectoryPage() {
           >
             Semua Proyek
           </button>
-          {MOCK_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.slug)}
@@ -73,10 +83,14 @@ export default function ProjectsDirectoryPage() {
 
       </div>
 
-      {/* Project Grid */}
-      {filteredProjects.length > 0 ? (
+      {/* Loading & Project Grid */}
+      {isLoading ? (
+        <div className="py-12 text-center text-xs font-bold text-text-muted">
+          Memuat data proyek dari Supabase...
+        </div>
+      ) : projects.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {filteredProjects.map((project) => (
+          {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>

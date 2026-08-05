@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createProposalInDb } from "@/lib/supabase/db";
 
 export async function POST(request: Request) {
   try {
@@ -11,16 +12,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const proposal = {
-      id: `prop-${Date.now()}`,
-      project_id: body.projectId,
-      freelancer_id: "f-1",
-      cover_letter: body.coverLetter,
-      proposed_amount: body.proposedAmount,
-      estimated_days: body.estimatedDays || 3,
-      status: "sent",
-      created_at: new Date().toISOString(),
-    };
+    const proposal = await createProposalInDb({
+      projectId: body.projectId,
+      freelancerId: body.freelancerId || "f-1",
+      proposedAmount: Number(body.proposedAmount),
+      estimatedDays: Number(body.estimatedDays) || 3,
+      coverLetter: body.coverLetter,
+    });
 
     return NextResponse.json({
       success: true,

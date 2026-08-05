@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { MOCK_PROJECTS } from "@/lib/mock-data";
+import { getProjects, createProjectInDb } from "@/lib/supabase/db";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const category = searchParams.get("category");
+  const category = searchParams.get("category") || undefined;
+  const q = searchParams.get("q") || undefined;
 
-  let projects = MOCK_PROJECTS;
-  if (category && category !== "all") {
-    projects = projects.filter((p) => p.category?.slug === category);
-  }
+  const projects = await getProjects(category, q);
 
   return NextResponse.json({
     success: true,
@@ -27,26 +25,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const newProject = {
-      id: `proj-${Date.now()}`,
-      client_id: "client-1",
+    const newProject = await createProjectInDb({
       title: body.title,
-      slug: body.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       description: body.description,
-      deliverables: body.deliverables || "",
-      budget_type: body.budget_type || "fixed",
-      budget_min: Number(body.budget_min) || 500000,
-      budget_max: Number(body.budget_max) || 1000000,
-      currency: "IDR",
-      experience_level: body.experience_level || "intermediate",
-      deadline: body.deadline || new Date().toISOString(),
-      work_mode: body.work_mode || "remote",
-      status: "published",
-      proposal_count: 0,
-      is_featured: false,
-      published_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-    };
+      deliverables: body.deliverables,
+      budget_type: body.budget_type,
+      budget_min: Number(body.budget_min),
+      budget_max: Number(body.budget_max),
+      category_id: body.category_id,
+      deadline: body.deadline,
+    });
 
     return NextResponse.json({
       success: true,
