@@ -1,9 +1,12 @@
 -- =====================================================================
--- TASKARA FULL PRODUCTION SCHEMA & SEED DATA (STRICT VALID UUID SYNTAX)
+-- TASKARA FULL PRODUCTION SCHEMA & SEED DATA (BULLETPROOF SUPABASE SQL)
 -- =====================================================================
 
 -- Enable required extensions
 create extension if not exists "uuid-ossp";
+
+-- Remove restrictive Foreign Key constraint on profiles if it exists from previous migration
+alter table if exists public.profiles drop constraint if exists profiles_id_fkey;
 
 -- 1. PROFILES TABLE
 create table if not exists public.profiles (
@@ -204,10 +207,10 @@ create policy "Public profiles read" on public.profiles for select using (true);
 create policy "Public projects read" on public.projects for select using (true);
 
 -- =====================================================================
--- REAL PRODUCTION SEED DATA (VALID HEXADECIMAL UUIDs ONLY)
+-- REAL PRODUCTION SEED DATA
 -- =====================================================================
 
--- SEED INSTITUTIONS (VALID HEX UUIDs)
+-- SEED INSTITUTIONS
 insert into public.institutions (id, name, slug, type, city, province, logo_url) values
   ('11111111-1111-1111-1111-111111111111', 'Universitas Indonesia', 'ui', 'university', 'Depok', 'Jawa Barat', 'https://api.dicebear.com/7.x/identicon/svg?seed=ui'),
   ('22222222-2222-2222-2222-222222222222', 'Institut Teknologi Bandung', 'itb', 'university', 'Bandung', 'Jawa Barat', 'https://api.dicebear.com/7.x/identicon/svg?seed=itb'),
@@ -215,7 +218,7 @@ insert into public.institutions (id, name, slug, type, city, province, logo_url)
   ('44444444-4444-4444-4444-444444444444', 'Institut Teknologi Sepuluh Nopember', 'its', 'polytechnic', 'Surabaya', 'Jawa Timur', 'https://api.dicebear.com/7.x/identicon/svg?seed=its')
 on conflict (slug) do nothing;
 
--- SEED CATEGORIES (VALID HEX UUIDs: prefix 'a1', 'a2', etc.)
+-- SEED CATEGORIES
 insert into public.categories (id, name, slug, description, icon, sort_order) values
   ('a1111111-1111-1111-1111-111111111111', 'Web Development', 'web-development', 'Pembuatan website, landing page, dan portal UMKM', 'Globe', 1),
   ('a2222222-2222-2222-2222-222222222222', 'UI/UX Design', 'ui-ux-design', 'Desain tampilan antarmuka, wireframe, dan prototype Figma', 'Figma', 2),
@@ -223,7 +226,7 @@ insert into public.categories (id, name, slug, description, icon, sort_order) va
   ('a4444444-4444-4444-4444-444444444444', 'Video Editing', 'video-editing', 'Editing video TikTok, Reels, YouTube, dan event recap', 'Video', 4)
 on conflict (slug) do nothing;
 
--- SEED SKILLS (VALID HEX UUIDs: prefix 'b1', 'b2', etc.)
+-- SEED SKILLS
 insert into public.skills (id, name, slug, category_id) values
   ('b1111111-1111-1111-1111-111111111111', 'Next.js', 'nextjs', 'a1111111-1111-1111-1111-111111111111'),
   ('b2222222-2222-2222-2222-222222222222', 'Tailwind CSS', 'tailwindcss', 'a1111111-1111-1111-1111-111111111111'),
@@ -231,7 +234,7 @@ insert into public.skills (id, name, slug, category_id) values
   ('b4444444-4444-4444-4444-444444444444', 'CapCut Pro / Premiere', 'video-editing', 'a4444444-4444-4444-4444-444444444444')
 on conflict (slug) do nothing;
 
--- SEED PROFILES (VALID HEX UUIDs: prefix 'c1', 'c2', 'c3')
+-- SEED PROFILES
 insert into public.profiles (id, username, full_name, avatar_url, bio, role, city, province, is_verified) values
   ('c1111111-1111-1111-1111-111111111111', 'budi_dev', 'Budi Pratama', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250', 'Frontend Developer Next.js & Tailwind CSS UI semester 6. Berpengalaman mengerjakan 14+ proyek web UMKM.', 'freelancer', 'Depok', 'Jawa Barat', true),
   ('c2222222-2222-2222-2222-222222222222', 'siti_design', 'Siti Rahmawati', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250', 'UI/UX Designer ITB DKV. Spesialisasi dalam desain landing page dan aplikasi mobile kuliner.', 'freelancer', 'Bandung', 'Jawa Barat', true),
@@ -249,7 +252,7 @@ insert into public.client_profiles (user_id, business_name, business_type, total
   ('c3333333-3333-3333-3333-333333333333', 'Warung Kopi Senja Bandung', 'Kuliner & F&B', 4500000, 3, 5.00)
 on conflict (user_id) do nothing;
 
--- SEED REAL PROJECTS (VALID HEX UUIDs: prefix 'e1', 'e2')
+-- SEED REAL PROJECTS
 insert into public.projects (id, client_id, category_id, title, slug, description, deliverables, budget_type, budget_min, budget_max, work_mode, status, proposal_count, is_featured) values
   ('e1111111-1111-1111-1111-111111111111', 'c3333333-3333-3333-3333-333333333333', 'a1111111-1111-1111-1111-111111111111', 'Pembuatan Website Landing Page Profil Warkop UMKM Bandung', 'pembuatan-website-landing-page-profil-warkop-umkm-bandung', 'Dibutuhkan pembuatan website landing page responsive dan estetik untuk mempromosikan daftar menu kopi, lokasi cabang, dan fitur pemesanan WhatsApp online.', '1. Source code Next.js + Tailwind CSS, 2. Bantuan Deploy Vercel Gratis, 3. Integrasi tombol WA Order', 'fixed', 750000, 1200000, 'remote', 'published', 5, true),
   ('e2222222-2222-2222-2222-222222222222', 'c3333333-3333-3333-3333-333333333333', 'a4444444-4444-4444-4444-444444444444', 'Editing 5 Video Short / Reels Promosi Produk Distro Fashion', 'editing-5-video-reels-promosi-distro-fashion', 'Dibutuhkan editor video kreatif untuk memotong footage mentah, memberikan subtitle animasi dinamis, serta sound effect viral.', '5 File Video MP4 (1080x1920) Siap Upload IG Reels & TikTok', 'fixed', 500000, 750000, 'remote', 'in_progress', 6, false)
@@ -268,5 +271,5 @@ insert into public.withdrawals (user_id, amount, fee, net_amount, bank_name, acc
 on conflict do nothing;
 
 -- =====================================================================
--- END OF FIXED SCHEMA & SEED (100% VALID POSTGRESQL UUID COMPLIANT)
+-- END OF FIXED SCHEMA & SEED
 -- =====================================================================
