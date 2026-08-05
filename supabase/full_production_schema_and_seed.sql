@@ -1,5 +1,5 @@
 -- =====================================================================
--- TASKARA FULL PRODUCTION SCHEMA & SEED DATA (READY FOR SUPABASE SQL EDITOR)
+-- TASKARA FULL PRODUCTION SCHEMA & SEED DATA (STRICT VALID UUID SYNTAX)
 -- =====================================================================
 
 -- Enable required extensions
@@ -197,14 +197,17 @@ alter table public.proposals enable row level security;
 alter table public.contracts enable row level security;
 alter table public.wallets enable row level security;
 
+drop policy if exists "Public profiles read" on public.profiles;
+drop policy if exists "Public projects read" on public.projects;
+
 create policy "Public profiles read" on public.profiles for select using (true);
 create policy "Public projects read" on public.projects for select using (true);
 
 -- =====================================================================
--- REAL PRODUCTION SEED DATA (INDONESIA CAMPUSES, UMKM & FREELANCERS)
+-- REAL PRODUCTION SEED DATA (VALID HEXADECIMAL UUIDs ONLY)
 -- =====================================================================
 
--- SEED INSTITUTIONS
+-- SEED INSTITUTIONS (VALID HEX UUIDs)
 insert into public.institutions (id, name, slug, type, city, province, logo_url) values
   ('11111111-1111-1111-1111-111111111111', 'Universitas Indonesia', 'ui', 'university', 'Depok', 'Jawa Barat', 'https://api.dicebear.com/7.x/identicon/svg?seed=ui'),
   ('22222222-2222-2222-2222-222222222222', 'Institut Teknologi Bandung', 'itb', 'university', 'Bandung', 'Jawa Barat', 'https://api.dicebear.com/7.x/identicon/svg?seed=itb'),
@@ -212,7 +215,7 @@ insert into public.institutions (id, name, slug, type, city, province, logo_url)
   ('44444444-4444-4444-4444-444444444444', 'Institut Teknologi Sepuluh Nopember', 'its', 'polytechnic', 'Surabaya', 'Jawa Timur', 'https://api.dicebear.com/7.x/identicon/svg?seed=its')
 on conflict (slug) do nothing;
 
--- SEED CATEGORIES
+-- SEED CATEGORIES (VALID HEX UUIDs: prefix 'a1', 'a2', etc.)
 insert into public.categories (id, name, slug, description, icon, sort_order) values
   ('a1111111-1111-1111-1111-111111111111', 'Web Development', 'web-development', 'Pembuatan website, landing page, dan portal UMKM', 'Globe', 1),
   ('a2222222-2222-2222-2222-222222222222', 'UI/UX Design', 'ui-ux-design', 'Desain tampilan antarmuka, wireframe, dan prototype Figma', 'Figma', 2),
@@ -220,50 +223,50 @@ insert into public.categories (id, name, slug, description, icon, sort_order) va
   ('a4444444-4444-4444-4444-444444444444', 'Video Editing', 'video-editing', 'Editing video TikTok, Reels, YouTube, dan event recap', 'Video', 4)
 on conflict (slug) do nothing;
 
--- SEED SKILLS
+-- SEED SKILLS (VALID HEX UUIDs: prefix 'b1', 'b2', etc.)
 insert into public.skills (id, name, slug, category_id) values
-  ('s1111111-1111-1111-1111-111111111111', 'Next.js', 'nextjs', 'a1111111-1111-1111-1111-111111111111'),
-  ('s2222222-2222-2222-2222-222222222222', 'Tailwind CSS', 'tailwindcss', 'a1111111-1111-1111-1111-111111111111'),
-  ('s3333333-3333-3333-3333-333333333333', 'Figma Design', 'figma', 'a2222222-2222-2222-2222-222222222222'),
-  ('s4444444-4444-4444-4444-444444444444', 'CapCut Pro / Premiere', 'video-editing', 'a4444444-4444-4444-4444-444444444444')
+  ('b1111111-1111-1111-1111-111111111111', 'Next.js', 'nextjs', 'a1111111-1111-1111-1111-111111111111'),
+  ('b2222222-2222-2222-2222-222222222222', 'Tailwind CSS', 'tailwindcss', 'a1111111-1111-1111-1111-111111111111'),
+  ('b3333333-3333-3333-3333-333333333333', 'Figma Design', 'figma', 'a2222222-2222-2222-2222-222222222222'),
+  ('b4444444-4444-4444-4444-444444444444', 'CapCut Pro / Premiere', 'video-editing', 'a4444444-4444-4444-4444-444444444444')
 on conflict (slug) do nothing;
 
--- SEED PROFILES (FREELANCERS & CLIENTS)
+-- SEED PROFILES (VALID HEX UUIDs: prefix 'c1', 'c2', 'c3')
 insert into public.profiles (id, username, full_name, avatar_url, bio, role, city, province, is_verified) values
-  ('f1111111-1111-1111-1111-111111111111', 'budi_dev', 'Budi Pratama', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250', 'Frontend Developer Next.js & Tailwind CSS UI semester 6. Berpengalaman mengerjakan 14+ proyek web UMKM.', 'freelancer', 'Depok', 'Jawa Barat', true),
-  ('f2222222-2222-2222-2222-222222222222', 'siti_design', 'Siti Rahmawati', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250', 'UI/UX Designer ITB DKV. Spesialisasi dalam desain landing page dan aplikasi mobile kuliner.', 'freelancer', 'Bandung', 'Jawa Barat', true),
-  ('c1111111-1111-1111-1111-111111111111', 'kopi_senja_bandung', 'Hendro Wijaya', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250', 'Pemilik Warung Kopi Senja UMKM Bandung.', 'client', 'Bandung', 'Jawa Barat', true)
+  ('c1111111-1111-1111-1111-111111111111', 'budi_dev', 'Budi Pratama', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250', 'Frontend Developer Next.js & Tailwind CSS UI semester 6. Berpengalaman mengerjakan 14+ proyek web UMKM.', 'freelancer', 'Depok', 'Jawa Barat', true),
+  ('c2222222-2222-2222-2222-222222222222', 'siti_design', 'Siti Rahmawati', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250', 'UI/UX Designer ITB DKV. Spesialisasi dalam desain landing page dan aplikasi mobile kuliner.', 'freelancer', 'Bandung', 'Jawa Barat', true),
+  ('c3333333-3333-3333-3333-333333333333', 'kopi_senja_bandung', 'Hendro Wijaya', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250', 'Pemilik Warung Kopi Senja UMKM Bandung.', 'client', 'Bandung', 'Jawa Barat', true)
 on conflict (username) do nothing;
 
 -- SEED FREELANCER DETAILS
 insert into public.freelancer_profiles (user_id, institution_id, major, graduation_year, experience_level, hourly_rate, total_earned, total_completed_projects, rating_average, rating_count) values
-  ('f1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Teknik Informatika', 2026, 'intermediate', 75000, 8400000, 14, 4.90, 14),
-  ('f2222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', 'Desain Komunikasi Visual', 2025, 'advanced', 90000, 12500000, 21, 5.00, 21)
+  ('c1111111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Teknik Informatika', 2026, 'intermediate', 75000, 8400000, 14, 4.90, 14),
+  ('c2222222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', 'Desain Komunikasi Visual', 2025, 'advanced', 90000, 12500000, 21, 5.00, 21)
 on conflict (user_id) do nothing;
 
 -- SEED CLIENT DETAILS
 insert into public.client_profiles (user_id, business_name, business_type, total_spent, total_projects, rating_average) values
-  ('c1111111-1111-1111-1111-111111111111', 'Warung Kopi Senja Bandung', 'Kuliner & F&B', 4500000, 3, 5.00)
+  ('c3333333-3333-3333-3333-333333333333', 'Warung Kopi Senja Bandung', 'Kuliner & F&B', 4500000, 3, 5.00)
 on conflict (user_id) do nothing;
 
--- SEED REAL PROJECTS
+-- SEED REAL PROJECTS (VALID HEX UUIDs: prefix 'e1', 'e2')
 insert into public.projects (id, client_id, category_id, title, slug, description, deliverables, budget_type, budget_min, budget_max, work_mode, status, proposal_count, is_featured) values
-  ('p1111111-1111-1111-1111-111111111111', 'c1111111-1111-1111-1111-111111111111', 'a1111111-1111-1111-1111-111111111111', 'Pembuatan Website Landing Page Profil Warkop UMKM Bandung', 'pembuatan-website-landing-page-profil-warkop-umkm-bandung', 'Dibutuhkan pembuatan website landing page responsive dan estetik untuk mempromosikan daftar menu kopi, lokasi cabang, dan fitur pemesanan WhatsApp online.', '1. Source code Next.js + Tailwind CSS, 2. Bantuan Deploy Vercel Gratis, 3. Integrasi tombol WA Order', 'fixed', 750000, 1200000, 'remote', 'published', 5, true),
-  ('p2222222-2222-2222-2222-222222222222', 'c1111111-1111-1111-1111-111111111111', 'a4444444-4444-4444-4444-444444444444', 'Editing 5 Video Short / Reels Promosi Produk Distro Fashion', 'editing-5-video-reels-promosi-distro-fashion', 'Dibutuhkan editor video kreatif untuk memotong footage mentah, memberikan subtitle animasi dinamis, serta sound effect viral.', '5 File Video MP4 (1080x1920) Siap Upload IG Reels & TikTok', 'fixed', 500000, 750000, 'remote', 'in_progress', 6, false)
+  ('e1111111-1111-1111-1111-111111111111', 'c3333333-3333-3333-3333-333333333333', 'a1111111-1111-1111-1111-111111111111', 'Pembuatan Website Landing Page Profil Warkop UMKM Bandung', 'pembuatan-website-landing-page-profil-warkop-umkm-bandung', 'Dibutuhkan pembuatan website landing page responsive dan estetik untuk mempromosikan daftar menu kopi, lokasi cabang, dan fitur pemesanan WhatsApp online.', '1. Source code Next.js + Tailwind CSS, 2. Bantuan Deploy Vercel Gratis, 3. Integrasi tombol WA Order', 'fixed', 750000, 1200000, 'remote', 'published', 5, true),
+  ('e2222222-2222-2222-2222-222222222222', 'c3333333-3333-3333-3333-333333333333', 'a4444444-4444-4444-4444-444444444444', 'Editing 5 Video Short / Reels Promosi Produk Distro Fashion', 'editing-5-video-reels-promosi-distro-fashion', 'Dibutuhkan editor video kreatif untuk memotong footage mentah, memberikan subtitle animasi dinamis, serta sound effect viral.', '5 File Video MP4 (1080x1920) Siap Upload IG Reels & TikTok', 'fixed', 500000, 750000, 'remote', 'in_progress', 6, false)
 on conflict (slug) do nothing;
 
 -- SEED WALLETS
 insert into public.wallets (user_id, available_balance, pending_balance, withdrawn_balance) values
-  ('f1111111-1111-1111-1111-111111111111', 1450000, 750000, 6200000),
-  ('f2222222-2222-2222-2222-222222222222', 3200000, 1200000, 11300000)
+  ('c1111111-1111-1111-1111-111111111111', 1450000, 750000, 6200000),
+  ('c2222222-2222-2222-2222-222222222222', 3200000, 1200000, 11300000)
 on conflict (user_id) do nothing;
 
 -- SEED WITHDRAWALS
 insert into public.withdrawals (user_id, amount, fee, net_amount, bank_name, account_number_encrypted, account_holder, status) values
-  ('f1111111-1111-1111-1111-111111111111', 1000000, 0, 1000000, 'Bank BCA', '1234567890', 'BUDI PRATAMA', 'completed'),
-  ('f1111111-1111-1111-1111-111111111111', 500000, 0, 500000, 'GoPay E-Wallet', '081234567890', 'BUDI PRATAMA', 'completed')
+  ('c1111111-1111-1111-1111-111111111111', 1000000, 0, 1000000, 'Bank BCA', '1234567890', 'BUDI PRATAMA', 'completed'),
+  ('c1111111-1111-1111-1111-111111111111', 500000, 0, 500000, 'GoPay E-Wallet', '081234567890', 'BUDI PRATAMA', 'completed')
 on conflict do nothing;
 
 -- =====================================================================
--- END OF FULL PRODUCTION SCHEMA & SEED
+-- END OF FIXED SCHEMA & SEED (100% VALID POSTGRESQL UUID COMPLIANT)
 -- =====================================================================
