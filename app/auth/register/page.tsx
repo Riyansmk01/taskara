@@ -34,12 +34,18 @@ function RegisterForm() {
 
   const handleGoogleLogin = async () => {
     try {
-      await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        router.push(role === "client" ? "/client" : "/dashboard");
+      }
     } catch (error) {
       router.push(role === "client" ? "/client" : "/dashboard");
     }
