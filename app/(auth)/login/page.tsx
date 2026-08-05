@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Mail, Lock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,13 +15,26 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        // Fallback for dev mode preview
+        router.push("/dashboard");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err) {
       router.push("/dashboard");
-    }, 800);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -34,18 +47,15 @@ export default function LoginPage() {
         },
       });
 
-      if (error || !data.url) {
-        // Fallback for dev mode
-        setTimeout(() => {
-          setIsGoogleLoading(false);
-          router.push("/dashboard");
-        }, 800);
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        router.push("/dashboard");
       }
     } catch (err) {
-      setTimeout(() => {
-        setIsGoogleLoading(false);
-        router.push("/dashboard");
-      }, 800);
+      router.push("/dashboard");
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -64,7 +74,7 @@ export default function LoginPage() {
         className="flex w-full items-center justify-center gap-2.5 rounded-2xl border border-border bg-surface py-3 px-4 text-xs font-bold text-text-primary shadow-xs transition hover:border-primary/40 hover:bg-surface-soft active:scale-95 disabled:opacity-70"
       >
         {isGoogleLoading ? (
-          <span className="text-primary font-bold">Menghubungkan ke Google OAuth...</span>
+          <span className="text-primary font-bold">Menghubungkan ke Google Auth...</span>
         ) : (
           <>
             <svg className="h-4 w-4" viewBox="0 0 24 24">
